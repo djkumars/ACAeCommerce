@@ -1,0 +1,83 @@
+services:
+  product-catalog:
+    build:
+      context: .
+      dockerfile: services/ProductCatalog/Dockerfile
+    ports: ["5081:8080"]
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+      StorefrontOrigin: http://localhost:4200
+      DatabaseAutoCreate: "true"
+      ConnectionStrings__CatalogDb: Server=sql,1433;Database=CatalogDb;User Id=sa;Password=${MSSQL_SA_PASSWORD:-LocalOnly_ChangeMe123!};Encrypt=False;TrustServerCertificate=True
+    depends_on:
+      sql:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080/health"]
+      interval: 15s
+      timeout: 3s
+      retries: 5
+  inventory:
+    build:
+      context: .
+      dockerfile: services/Inventory/Dockerfile
+    ports: ["5082:8080"]
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+      StorefrontOrigin: http://localhost:4200
+      DatabaseAutoCreate: "true"
+      ConnectionStrings__InventoryDb: Server=sql,1433;Database=InventoryDb;User Id=sa;Password=${MSSQL_SA_PASSWORD:-LocalOnly_ChangeMe123!};Encrypt=False;TrustServerCertificate=True
+    depends_on:
+      sql:
+        condition: service_healthy
+  sandbox-payment:
+    build:
+      context: .
+      dockerfile: services/Payment/Dockerfile
+    ports: ["5084:8080"]
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+      StorefrontOrigin: http://localhost:4200
+      DatabaseAutoCreate: "true"
+      ConnectionStrings__PaymentsDb: Server=sql,1433;Database=PaymentsDb;User Id=sa;Password=${MSSQL_SA_PASSWORD:-LocalOnly_ChangeMe123!};Encrypt=False;TrustServerCertificate=True
+    depends_on:
+      sql:
+        condition: service_healthy
+  order:
+    build:
+      context: .
+      dockerfile: services/Order/Dockerfile
+    ports: ["5083:8080"]
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+      StorefrontOrigin: http://localhost:4200
+      CatalogApiUrl: http://product-catalog:8080
+      InventoryApiUrl: http://inventory:8080
+      PaymentApiUrl: http://sandbox-payment:8080
+      DatabaseAutoCreate: "true"
+      ConnectionStrings__OrdersDb: Server=sql,1433;Database=OrdersDb;User Id=sa;Password=${MSSQL_SA_PASSWORD:-LocalOnly_ChangeMe123!};Encrypt=False;TrustServerCertificate=True
+    depends_on:
+      product-catalog:
+        condition: service_healthy
+      inventory:
+        condition: service_started
+      sandbox-payment:
+        condition: service_started
+      sql:
+        condition: service_healthy
+  sql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD:-LocalOnly_ChangeMe123!}
+    ports: ["1433:1433"]
+    volumes: ["sql-data:/var/opt/mssql"]
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -C -Q \"SELECT 1\""]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+
+volumes:
+  sql-data:

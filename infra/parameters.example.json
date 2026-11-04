@@ -1,0 +1,19 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "namePrefix": { "value": "acaecom" },
+    "location": { "value": "eastus2" },
+    "sqlAdminLogin": { "value": "acaecomadmin" },
+    "sqlAdminPassword": { "value": "REPLACE_WITH_SECURE_PARAMETER" },
+    "catalogImage": { "value": "REPLACE_WITH_ACR_IMAGE" },
+    "inventoryImage": { "value": "REPLACE_WITH_ACR_IMAGE" },
+    "orderImage": { "value": "REPLACE_WITH_ACR_IMAGE" },
+    "paymentImage": { "value": "REPLACE_WITH_ACR_IMAGE" },
+    "webImage": { "value": "REPLACE_WITH_ACR_IMAGE" },
+    "catalogMinReplicas": { "value": 1 },
+    "inventoryMinReplicas": { "value": 1 },
+    "orderMinReplicas": { "value": 1 },
+    "paymentMinReplicas": { "value": 1 }
+  }
+}

@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/services/">
+    <Project Path="services/Shared.Persistence/Shared.Persistence.csproj" />
+    <Project Path="services/ProductCatalog/ProductCatalog.csproj" />
+    <Project Path="services/Inventory/Inventory.csproj" />
+    <Project Path="services/Order/Order.csproj" />
+    <Project Path="services/Payment/Payment.csproj" />
+    <Project Path="tests/Storefront.Tests/Storefront.Tests.csproj" />
+  </Folder>
+</Solution>
